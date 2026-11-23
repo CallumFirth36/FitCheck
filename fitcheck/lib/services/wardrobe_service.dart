@@ -69,4 +69,23 @@ class WardrobeService {
   Future<void> deleteItem(String id) async {
     await _items.doc(id).delete();
   }
+
+  // ---------------------------------------------------------------
+  // DELETE ALL: removes every item in the user's wardrobe.
+  // Used when an account is deleted, because Firestore does not remove a
+  // user's data when their account goes. Must run while still signed in,
+  // as the security rules only allow a signed in user to touch their items.
+  // ---------------------------------------------------------------
+  Future<void> deleteAllItems() async {
+    final snapshot = await _items.get();
+
+    // A batch can hold at most 500 writes, so delete in chunks of 400
+    for (var i = 0; i < snapshot.docs.length; i += 400) {
+      final batch = _db.batch();
+      for (final doc in snapshot.docs.skip(i).take(400)) {
+        batch.delete(doc.reference);
+      }
+      await batch.commit();
+    }
+  }
 }

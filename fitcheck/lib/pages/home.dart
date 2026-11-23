@@ -1,4 +1,3 @@
-import 'package:fitcheck/pages/outfit_page.dart';
 import 'package:flutter/material.dart';
 import 'package:fitcheck/widgets/gradient_background.dart';
 import 'package:fitcheck/core/app_colours.dart';
@@ -33,19 +32,31 @@ class HomePage extends StatelessWidget {
       // --- Body ---
       body: GradientBackground(
 
-        child: Center(
+        // CHANGED: the layout is pinned instead of centred. The heading is
+        // fixed this far from the top, the buttons this far from the bottom,
+        // and the Spacer fills the space between. Changing the text size
+        // can no longer shift anything: the heading just grows downwards into
+        // the gap. (Before, the whole column was centred, so a taller heading
+        // pushed everything up.)
+        // top: bigger number = heading sits lower. bottom: bigger = buttons sit higher.
+        child: Padding(
+          padding: const EdgeInsets.only(top: 115, bottom: 105),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
-                'Welcome to FitCheck',
-                style: TextStyle(
-                  fontSize: 36,
-                  color: AppColors.textOnDark ,
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 24),
+                child: Text(
+                  'Welcome to FitCheck',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 36,
+                    color: AppColors.textOnDark,
+                  ),
                 ),
               ),
 
-              const SizedBox(height: 350),
+              // CHANGED: replaces the fixed 350 gap
+              const Spacer(),
 
               SizedBox(
                 width: 250,
