@@ -9,8 +9,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 class AccountPage extends StatelessWidget {
   const AccountPage({super.key});
 
-  // Signs the user out of Firebase. AuthLayout notices and shows the login
-  // page by itself, so there is nothing to navigate to here.
+  // Signs the user out of Firebase. AuthLayout shows login
   Future<void> _logout() async {
     try {
       await authService.value.signOut();
@@ -22,7 +21,7 @@ class AccountPage extends StatelessWidget {
   void _openChangePassword(BuildContext context) {
     showDialog(
       context: context,
-      barrierDismissible: false, // only the Cancel button closes it
+      barrierDismissible: false,
       builder: (_) => const _ChangePasswordDialog(),
     );
   }
@@ -38,7 +37,6 @@ class AccountPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // lets the gradient show behind the (transparent) app bar, like HomePage
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: const Text(
@@ -55,9 +53,9 @@ class AccountPage extends StatelessWidget {
         colours: AppColors.authGradient,
         child: SafeArea(
           child: ListView(
-            // top padding (kToolbarHeight) keeps the list below the app bar
             padding: const EdgeInsets.fromLTRB(24, kToolbarHeight + 16, 24, 24),
             children: [
+              // change password
               _AccountRow(
                 label: 'Change Password',
                 icon: Icons.lock_outline,
@@ -69,7 +67,7 @@ class AccountPage extends StatelessWidget {
               const _PreferencesSection(),
               const _RowDivider(),
 
-              // red so it reads as destructive
+              // Delete account button
               _AccountRow(
                 label: 'Delete Account',
                 icon: Icons.delete_outline,
@@ -80,7 +78,7 @@ class AccountPage extends StatelessWidget {
 
               const SizedBox(height: 40),
 
-              // ---- Red log out button ----
+              // log out
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -101,7 +99,7 @@ class AccountPage extends StatelessWidget {
   }
 }
 
-// Turns Firebase's error codes into messages a person can understand.
+// Error Codes
 String _messageFor(FirebaseAuthException e) {
   switch (e.code) {
     case 'wrong-password':
@@ -120,9 +118,8 @@ String _messageFor(FirebaseAuthException e) {
   }
 }
 
-// ---------------------------------------------------------------
-// Change password dialog: current password + new password.
-// ---------------------------------------------------------------
+
+// Change password
 class _ChangePasswordDialog extends StatefulWidget {
   const _ChangePasswordDialog();
 
@@ -147,7 +144,6 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
     final current = _currentController.text;
     final next = _newController.text;
 
-    // checked here first so the user gets a quick message, no network needed
     if (current.isEmpty) {
       setState(() => _error = 'Enter your current password.');
       return;
@@ -157,7 +153,6 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
       return;
     }
 
-    // grabbed before the await, as context shouldn't be used after it
     final navigator = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
 
@@ -239,9 +234,7 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
   }
 }
 
-// ---------------------------------------------------------------
-// Delete account dialog: warning + password to confirm.
-// ---------------------------------------------------------------
+// Delete account
 class _DeleteAccountDialog extends StatefulWidget {
   const _DeleteAccountDialog();
 
@@ -276,20 +269,12 @@ class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
     });
 
     try {
-      // The order matters:
-      // 1. check the password first, so a wrong one stops everything
-      //    before anything has been deleted
       await authService.value.reauthenticate(password: password);
 
-      // 2. delete the wardrobe while still signed in (the security rules
-      //    only let a signed in user touch their own items)
       await wardrobeService.deleteAllItems();
 
-      // 3. delete the account last, as this step can't be undone.
-      //    AuthLayout then shows the login page by itself.
       await authService.value.deleteAccount();
 
-      // the dialog is its own route, so it has to be closed here
       if (!mounted) return;
       navigator.pop();
       messenger.showSnackBar(
@@ -360,21 +345,16 @@ class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
   }
 }
 
-// ---------------------------------------------------------------
-// Preferences: a row that expands in place. The options go inside
-// 'children' once they're decided.
-// ---------------------------------------------------------------
+// preferences - text size
 class _PreferencesSection extends StatelessWidget {
   const _PreferencesSection();
 
   @override
   Widget build(BuildContext context) {
-    // Transparent Material so the tap ripple shows on top of the gradient
     return Material(
       color: Colors.transparent,
       child: ExpansionTile(
         tilePadding: EdgeInsets.zero,
-        // empty borders remove the lines ExpansionTile draws by default
         shape: Border(),
         collapsedShape: Border(),
         iconColor: Colors.white70,
@@ -401,8 +381,6 @@ class _PreferencesSection extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
 
-                  // Rebuilds the chips when the setting changes, so the
-                  // selected one always matches the current size.
                   ValueListenableBuilder<TextSizeOption>(
                     valueListenable: settingsService.textSize,
                     builder: (context, current, _) {
@@ -431,8 +409,6 @@ class _PreferencesSection extends StatelessWidget {
   }
 }
 
-// One row in the list: icon, label and a small arrow. Not a button visually,
-// but it still reacts to taps. color lets a row (e.g. Delete) stand out.
 class _AccountRow extends StatelessWidget {
   const _AccountRow({
     required this.label,
@@ -443,12 +419,11 @@ class _AccountRow extends StatelessWidget {
 
   final String label;
   final IconData icon;
-  final VoidCallback? onTap; // optional: what happens when the row is tapped
+  final VoidCallback? onTap;
   final Color color;
 
   @override
   Widget build(BuildContext context) {
-    // Transparent Material so the tap ripple shows on top of the gradient
     return Material(
       color: Colors.transparent,
       child: ListTile(
@@ -456,13 +431,13 @@ class _AccountRow extends StatelessWidget {
         leading: Icon(icon, color: color),
         title: Text(label, style: TextStyle(fontSize: 18, color: color)),
         trailing: const Icon(Icons.chevron_right, color: Colors.white70),
-        onTap: onTap ?? () {}, // does nothing if no onTap was given
+        onTap: onTap ?? () {},
       ),
     );
   }
 }
 
-// The thin line between rows. Delete the _RowDivider() lines above for no lines.
+// line between options
 class _RowDivider extends StatelessWidget {
   const _RowDivider();
 

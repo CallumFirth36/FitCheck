@@ -6,7 +6,7 @@ import 'package:fitcheck/services/wardrobe_service.dart';
 import 'package:fitcheck/widgets/clothing_item_card.dart';
 import 'package:fitcheck/widgets/gradient_background.dart';
 
-// Shows the user's wardrobe as a list of cards, live from Firestore.
+// displays users wardrobe
 class WardrobePage extends StatefulWidget {
   const WardrobePage({super.key});
 
@@ -15,12 +15,10 @@ class WardrobePage extends StatefulWidget {
 }
 
 class _WardrobePageState extends State<WardrobePage> {
-  // Created once here, not inside build(), so the page doesn't re-subscribe
-  // to Firestore every time it rebuilds.
+
   late final Stream<List<ClothingItem>> _itemsStream =
       wardrobeService.watchItems();
 
-  // Asks "are you sure?", then deletes the item if the user confirms.
   Future<void> _confirmDelete(ClothingItem item) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -40,12 +38,10 @@ class _WardrobePageState extends State<WardrobePage> {
       ),
     );
 
-    // Cancelled (or dialog dismissed), so do nothing
     if (confirmed != true) return;
 
     try {
       await wardrobeService.deleteItem(item.id);
-      // No need to refresh: the stream sends the new list by itself
     } catch (e) {
       print(e);
       if (!mounted) return;
@@ -75,7 +71,6 @@ class _WardrobePageState extends State<WardrobePage> {
         iconTheme: const IconThemeData(color: AppColors.textOnDark),
       ),
 
-      // The round "+" button in the bottom corner: opens the add-item form
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.of(context).push(
@@ -101,7 +96,6 @@ class _WardrobePageState extends State<WardrobePage> {
                 );
               }
 
-              // 2. Still waiting for the first batch of data
               if (!snapshot.hasData) {
                 return const Center(
                   child: CircularProgressIndicator(color: Colors.white),
@@ -110,7 +104,6 @@ class _WardrobePageState extends State<WardrobePage> {
 
               final items = snapshot.data!;
 
-              // 3. Loaded, but nothing in it yet
               if (items.isEmpty) {
                 return const _Message(
                   icon: Icons.checkroom,
@@ -119,7 +112,6 @@ class _WardrobePageState extends State<WardrobePage> {
                 );
               }
 
-              // 4. Loaded: one card per item
               return ListView.separated(
                 // top padding keeps the first card below the app bar
                 padding:

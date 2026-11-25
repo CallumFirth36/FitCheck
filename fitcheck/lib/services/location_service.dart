@@ -1,8 +1,7 @@
 import 'package:geolocator/geolocator.dart';
 
-// A latitude/longitude pair, plus whether it's the fallback location.
 class AppLocation {
-  final double latitude;
+  final double latitude; 
   final double longitude;
   final bool isDefault; // true if this is the fallback, not the real position
 
@@ -13,13 +12,11 @@ class AppLocation {
   });
 }
 
-// Finds out where the user is, using the phone's location hardware (GPS).
-// If anything goes wrong, it returns a default city instead of failing, so
-// the weather (and your demo) still works.
+// Gets location form GPS
 class LocationService {
-  // Fallback used when the real location can't be found (permission denied,
-  // location switched off, no GPS fix...). CHANGE this to your own city.
-  static const double defaultLatitude = 51.5072;   // London
+  
+  // default location if cant get location (london)
+  static const double defaultLatitude = 51.5072;
   static const double defaultLongitude = -0.1276;
 
   AppLocation _fallback() => const AppLocation(
@@ -30,12 +27,9 @@ class LocationService {
 
   Future<AppLocation> getLocation() async {
     try {
-      // 1. Is location switched on for the whole phone?
       final serviceOn = await Geolocator.isLocationServiceEnabled();
       if (!serviceOn) return _fallback();
 
-      // 2. Has the user allowed this app to use it? If we haven't asked yet,
-      //    this shows the system permission popup.
       var permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
@@ -45,9 +39,6 @@ class LocationService {
         return _fallback();
       }
 
-      // 3. Ask the phone for its position. "high" accuracy asks for the
-      //    GPS chip. If there's no fix within 10 seconds it gives up and
-      //    throws, which the catch below turns into the fallback.
       final position = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.high,

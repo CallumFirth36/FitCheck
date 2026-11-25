@@ -1,18 +1,14 @@
-// A snapshot of today's weather at the user's location.
-// Like ClothingItem, this is a "model": one class that describes the data,
-// so the home page and the outfit logic both use the same fields.
+// current weather info
 class WeatherInfo {
-  // A rain chance at or above this (in %) counts as "rain likely".
-  // The outfit logic will use it to decide whether to pick waterproof items.
   static const int rainLikelyThreshold = 40;
 
-  final double temperature;   // °C right now
-  final double feelsLike;     // °C "feels like" (includes wind chill)
-  final double windSpeed;     // km/h
+  final double temperature; // °C
+  final double feelsLike; // °C "feels like"
+  final double windSpeed; // km/h
   final double precipitation; // mm of rain falling right now
-  final int rainChance;       // 0 to 100 %, highest chance today
-  final int weatherCode;      // WMO weather code (see description below)
-  final bool usedDefaultLocation; // true if GPS wasn't available
+  final int rainChance;
+  final int weatherCode;
+  final bool usedDefaultLocation; // if cant get GPS location
 
   const WeatherInfo({
     required this.temperature,
@@ -24,10 +20,7 @@ class WeatherInfo {
     required this.usedDefaultLocation,
   });
 
-  // Builds a WeatherInfo from the JSON Open-Meteo sends back.
-  // The JSON looks like:
-  //   { "current": { "temperature_2m": 8.4, "wind_speed_10m": 12.1, ... },
-  //     "daily":   { "precipitation_probability_max": [35], ... } }
+  // Build weatehr info form Open-Meteo
   factory WeatherInfo.fromJson(
     Map<String, dynamic> json, {
     required bool usedDefaultLocation,
@@ -35,8 +28,6 @@ class WeatherInfo {
     final current = json['current'] as Map<String, dynamic>;
     final daily = json['daily'] as Map<String, dynamic>;
 
-    // "daily" values come as lists with one entry per day. We asked for
-    // one day, so we want the first entry (if there is one).
     final chances = daily['precipitation_probability_max'] as List?;
     final firstChance =
         (chances != null && chances.isNotEmpty) ? chances.first as num? : null;
@@ -52,11 +43,10 @@ class WeatherInfo {
     );
   }
 
-  // True if it's raining now, or rain is reasonably likely today
   bool get rainLikely =>
       precipitation > 0 || rainChance >= rainLikelyThreshold;
 
-  // Plain-English text for the WMO weather code Open-Meteo sends
+
   String get description => switch (weatherCode) {
         0 => 'Clear sky',
         1 => 'Mostly clear',

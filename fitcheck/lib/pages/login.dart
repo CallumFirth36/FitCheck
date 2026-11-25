@@ -6,8 +6,6 @@ import 'package:fitcheck/services/auth_service.dart';
 import 'package:fitcheck/widgets/auth_text_field.dart';
 import 'package:fitcheck/widgets/gradient_background.dart';
 
-// CHANGE: now a StatefulWidget, because the text controllers have to live
-// in a State object (a StatelessWidget can't own them).
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -58,16 +56,7 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  // ---------------------------------------------------------------
-  // Your signIn function. Logic is the same as yours:
-  // 1. Sends the email and password to Firebase.
-  // 2. If they're correct, Firebase signs the user in. We don't navigate
-  //    anywhere: AuthLayout is listening, sees a signed-in user and swaps
-  //    this page for AppNavigationLayout by itself.
-  // 3. If Firebase rejects it, the error is printed (for you) and a
-  //    friendly message is shown on screen (for the user).
-  // CHANGES: uses the controllers above, trims the email, shows a message.
-  // ---------------------------------------------------------------
+  // sign in
   void signIn() async {
     try {
       await authService.value.signIn(
@@ -80,10 +69,7 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  // ---------------------------------------------------------------
-  // "Forgot Password?" button: emails a reset link to whatever is in the
-  // email field, using the resetPassword method in your AuthService.
-  // ---------------------------------------------------------------
+  // forgot password
   void forgotPassword() async {
     final email = _emailController.text.trim();
 

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 // clothing colour
 class ClothingColour {
-  final String name;  // what gets stored in Firestore, e.g. "navy"
-  final Color color;  // what gets drawn on screen
+  final String name;
+  final Color color;
   const ClothingColour(this.name, this.color);
 }
 
@@ -29,12 +29,11 @@ class ClothingColours {
 
 
   // Finds the on-screen colour for a stored name.
-  // Unknown or empty names fall back to grey so a card never breaks.
   static Color colorFor(String name) {
     final wanted = name.toLowerCase().trim();
     for (final c in all) {
       if (c.name == wanted) return c.color;
     }
-    return const Color(0xFF9E9E9E);
+    return const Color(0xFF9E9E9E); // return grey if cant find colour
   }
 }

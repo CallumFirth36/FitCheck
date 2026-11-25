@@ -9,7 +9,6 @@ import 'package:fitcheck/services/weather_service.dart';
 import 'package:fitcheck/widgets/clothing_item_card.dart';
 import 'package:fitcheck/widgets/gradient_background.dart';
 
-// Shows today's suggested outfit, built from the weather and your wardrobe.
 class OutfitPage extends StatefulWidget {
   const OutfitPage({super.key});
 
@@ -27,10 +26,9 @@ class _OutfitPageState extends State<OutfitPage> {
   @override
   void initState() {
     super.initState();
-    _load(); // start loading as soon as the page opens
+    _load();
   }
 
-  // Fetches the weather and the wardrobe, then builds the first outfit.
   Future<void> _load() async {
     setState(() {
       _loading = true;
@@ -38,8 +36,6 @@ class _OutfitPageState extends State<OutfitPage> {
     });
 
     try {
-      // Both requests run at the same time, and .wait waits for both.
-      // watchItems().first takes just the first batch from the live stream.
       final (weather, wardrobe) = await (
         weatherService.getCurrentWeather(),
         wardrobeService.watchItems().first,
@@ -62,8 +58,7 @@ class _OutfitPageState extends State<OutfitPage> {
     }
   }
 
-  // "Try another": runs the logic again on the same data. The logic picks
-  // randomly among equally good items, so this usually gives a new outfit.
+
   void _shuffle() {
     final weather = _weather;
     if (weather == null) return;
@@ -95,7 +90,7 @@ class _OutfitPageState extends State<OutfitPage> {
   }
 
   Widget _buildBody() {
-    // 1. Loading
+    // Loading
     if (_loading) {
       return const Center(
         child: Column(
@@ -112,7 +107,7 @@ class _OutfitPageState extends State<OutfitPage> {
       );
     }
 
-    // 2. Something failed
+    // Something failed
     if (_error != null) {
       return _Message(
         icon: Icons.error_outline,
@@ -125,7 +120,7 @@ class _OutfitPageState extends State<OutfitPage> {
       );
     }
 
-    // 3. Nothing to build an outfit from
+    // Nothing to build an outfit from
     if (_wardrobe.isEmpty) {
       return const _Message(
         icon: Icons.checkroom,
@@ -134,7 +129,7 @@ class _OutfitPageState extends State<OutfitPage> {
       );
     }
 
-    // 4. The outfit
+    // The outfit
     final outfit = _outfit!;
     final weather = _weather!;
 
@@ -180,7 +175,7 @@ class _OutfitPageState extends State<OutfitPage> {
   }
 }
 
-// A section title, e.g. "Your outfit"
+// Your Outfit
 class _Heading extends StatelessWidget {
   const _Heading(this.text);
 
@@ -199,7 +194,7 @@ class _Heading extends StatelessWidget {
   }
 }
 
-// The short weather summary at the top of the page
+// weather
 class _WeatherSummary extends StatelessWidget {
   const _WeatherSummary({required this.weather});
 
@@ -245,7 +240,7 @@ class _WeatherSummary extends StatelessWidget {
   }
 }
 
-// One explanation line with a small icon
+// explanation 
 class _NoteRow extends StatelessWidget {
   const _NoteRow({required this.text});
 
@@ -269,7 +264,7 @@ class _NoteRow extends StatelessWidget {
   }
 }
 
-// Centred icon + text (+ optional button), for the error and empty states
+
 class _Message extends StatelessWidget {
   const _Message({
     required this.icon,

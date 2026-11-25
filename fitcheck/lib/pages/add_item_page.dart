@@ -20,7 +20,7 @@ class _AddItemPageState extends State<AddItemPage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
 
-  // The choices the user makes. These are what get saved.
+  // The choices the user makes
   ClothingCategory _category = ClothingCategory.top;
   String? _colour;            // null until a swatch is tapped
   bool _colourError = false;  // true shows "Please pick a colour"
@@ -52,8 +52,7 @@ class _AddItemPageState extends State<AddItemPage> {
     );
   }
 
-  // One tappable colour circle. The selected one gets a thick accent ring
-  // and a tick.
+  // Outline chosen colour
   Widget _colourSwatch(ClothingColour c) {
     final selected = _colour == c.name;
     final tickColor =
@@ -85,12 +84,7 @@ class _AddItemPageState extends State<AddItemPage> {
     );
   }
 
-  // ---------------------------------------------------------------
-  // Runs when "Save Item" is pressed:
-  // 1. checks the name is filled in and a colour is picked,
-  // 2. builds a ClothingItem from the form,
-  // 3. saves it with wardrobeService, then goes back to the wardrobe.
-  // ---------------------------------------------------------------
+  // Builds the clothing item and sames it with wardrobe service
   Future<void> _save() async {
     final formOk = _formKey.currentState!.validate();
     final colourOk = _colour != null;
@@ -112,15 +106,14 @@ class _AddItemPageState extends State<AddItemPage> {
 
     setState(() => _saving = true);
     try {
-      // Firestore only finishes this once the server confirms, which never
-      // happens offline. The timeout stops the button spinning forever.
+
       await wardrobeService.addItem(item).timeout(const Duration(seconds: 8));
 
       if (!mounted) return;
       messenger.showSnackBar(SnackBar(content: Text('Added "${item.name}"')));
       navigator.pop(); // back to the wardrobe page
     } on TimeoutException {
-      // Offline: Firestore keeps the item and sends it when back online
+
       if (!mounted) return;
       messenger.showSnackBar(const SnackBar(
         content: Text("You seem to be offline. It will save when you reconnect."),
@@ -192,7 +185,7 @@ class _AddItemPageState extends State<AddItemPage> {
                     ),
                   ),
 
-                  // ---- Colour: one circle per colour in your colour list ----
+                  //  Colour: one circle per colour in your colour list 
                   _label('Colour'),
                   Padding(
                     padding: _side,
@@ -212,7 +205,7 @@ class _AddItemPageState extends State<AddItemPage> {
                       ),
                     ),
 
-                  // ---- Warmth: slider from 1 to 5 ----
+                  //  Warmth: slider from 1 to 5 
                   _label('Warmth: $_warmth / ${ClothingItem.maxWarmth}'),
                   Padding(
                     padding: _side,
@@ -238,7 +231,7 @@ class _AddItemPageState extends State<AddItemPage> {
                     ),
                   ),
 
-                  // ---- Waterproof switch ----
+                  //  Waterproof switch 
                   const SizedBox(height: 8),
                   Padding(
                     padding: _side,
@@ -258,7 +251,7 @@ class _AddItemPageState extends State<AddItemPage> {
                     ),
                   ),
 
-                  // ---- Save button (greyed out with a spinner while saving) ----
+                  //  Save button (greyed out with a spinner while saving) 
                   const SizedBox(height: 24),
                   Center(
                     child: SizedBox(

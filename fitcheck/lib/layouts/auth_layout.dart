@@ -5,6 +5,7 @@ import 'package:fitcheck/pages/app_loading_page.dart';
 import 'package:fitcheck/pages/login.dart';
 import 'package:fitcheck/layouts/app_navigation_layout.dart';
 
+// changes page if user is logged in
 class AuthLayout extends StatelessWidget {
   const AuthLayout({super.key, this.pageIfNotConnected,});
 

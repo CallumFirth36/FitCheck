@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fitcheck/services/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:fitcheck/pages/home.dart'; // CHANGE: needed so popPage() can open HomePage
+import 'package:fitcheck/pages/home.dart';
 import 'package:fitcheck/widgets/gradient_background.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -27,14 +27,7 @@ class _SignUpPageState extends State<SignUpPage> {
     super.dispose();
   }
 
-  // ---------------------------------------------------------------
-  // Your register function.
-  // 1. Sends the email and password to Firebase to create the account.
-  // 2. If that works, Firebase also signs the new user in automatically.
-  // 3. popPage() then closes this page (see below).
-  // 4. If Firebase rejects it (email already used, bad email, etc.)
-  //    the error message is printed to the debug console.
-  // ---------------------------------------------------------------
+  // register
   void register() async{
     try {
       await authService.value.signUp(email: _emailController.text.trim(), password: _passwordController.text);
@@ -48,23 +41,13 @@ class _SignUpPageState extends State<SignUpPage> {
    
   }
 
-   // ---------------------------------------------------------------
-  // popPage: closes the sign-up page. AuthLayout (the first screen) then
-  // shows AppNavigationLayout by itself, because the new account is
-  // already signed in.
-  // ---------------------------------------------------------------
   void popPage() {
     if (!mounted) return;
 
-    // Keeps closing pages until only the first screen (AuthLayout) is left
     Navigator.of(context).popUntil((route) => route.isFirst);
   }
 
-  // ---------------------------------------------------------------
-  // Runs when "Create Account" is pressed.
-  // CHANGE: this used to show a test snackbar. Now it checks the form
-  // and, if it's valid, calls your register() function.
-  // ---------------------------------------------------------------
+  // runs create account
   void _submit() {
     // If any validator fails, the error shows under the field and we stop
     if (!_formKey.currentState!.validate()) return;

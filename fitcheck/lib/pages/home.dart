@@ -15,7 +15,7 @@ class HomePage extends StatelessWidget {
       extendBodyBehindAppBar: true,
 
 
-      // --- App Bar ---
+      // App Bar
       appBar: AppBar(
         title: const Text(
           'FitCheck',
@@ -29,16 +29,9 @@ class HomePage extends StatelessWidget {
         backgroundColor: Colors.transparent,
       ),
 
-      // --- Body ---
+      // Body 
       body: GradientBackground(
 
-        // CHANGED: the layout is pinned instead of centred. The heading is
-        // fixed this far from the top, the buttons this far from the bottom,
-        // and the Spacer fills the space between. Changing the text size
-        // can no longer shift anything: the heading just grows downwards into
-        // the gap. (Before, the whole column was centred, so a taller heading
-        // pushed everything up.)
-        // top: bigger number = heading sits lower. bottom: bigger = buttons sit higher.
         child: Padding(
           padding: const EdgeInsets.only(top: 115, bottom: 105),
           child: Column(
@@ -55,7 +48,7 @@ class HomePage extends StatelessWidget {
                 ),
               ),
 
-              // CHANGED: replaces the fixed 350 gap
+              
               const Spacer(),
 
               SizedBox(

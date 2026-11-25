@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fitcheck/core/app_colours.dart';
 
-// The white rounded text box used on the login and sign-up pages.
-// Written once here, so a change to its look updates every page.
+// auth text box
 class AuthTextField extends StatelessWidget {
   const AuthTextField({
     super.key,
@@ -13,11 +12,11 @@ class AuthTextField extends StatelessWidget {
     this.validator,
   });
 
-  final TextEditingController controller; // holds what the user types
-  final String hint;                      // placeholder text shown when empty
-  final bool isPassword;                  // true hides the characters
-  final TextInputType? keyboardType;      // e.g. the email keyboard
-  final String? Function(String?)? validator; // optional: only used inside a Form
+  final TextEditingController controller; 
+  final String hint;
+  final bool isPassword;   
+  final TextInputType? keyboardType;
+  final String? Function(String?)? validator;
 
   @override
   Widget build(BuildContext context) {

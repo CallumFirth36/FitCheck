@@ -36,24 +36,19 @@ class AuthService {
     await currentUser?.updateDisplayName(username);
   }
 
-  // CHANGED: new. Checks a password is correct by signing the user in again.
-  // Firebase wants a recent login before sensitive actions (changing the
-  // password, deleting the account). Throws if the password is wrong.
   Future<void> reauthenticate({required String password}) async {
     final user = currentUser!;
     final credential = EmailAuthProvider.credential(email: user.email!, password: password);
     await user.reauthenticateWithCredential(credential);
   }
 
-  // CHANGED: no longer takes an email and password. Call reauthenticate()
-  // first, so a wrong password stops things before anything is deleted.
+  // deletes account
   Future<void> deleteAccount() async {
     await currentUser!.delete();
     await firebaseAuth.signOut();
   }
 
-  // CHANGED: no longer takes an email, it uses the signed in user's own.
-  // Checks the current password, then sets the new one.
+  // changes password
   Future<void> resetPasswordFromCurrentPassword({required String currentPassword, required String newPassword}) async {
     await reauthenticate(password: currentPassword);
     await currentUser!.updatePassword(newPassword);

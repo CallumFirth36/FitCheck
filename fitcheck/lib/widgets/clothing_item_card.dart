@@ -3,14 +3,13 @@ import 'package:fitcheck/core/app_colours.dart';
 import 'package:fitcheck/core/clothing_colours.dart';
 import 'package:fitcheck/models/clothing_item.dart';
 
-// Icon shown for each category. Change them here if you prefer others.
-// (An unnamed-style private extension: only usable inside this file.)
+// Icon for categories
 extension _CategoryIcon on ClothingCategory {
   IconData get icon {
     switch (this) {
       case ClothingCategory.top:
         return Icons.checkroom;
-      case ClothingCategory.midLayer: // CHANGED: new category needs an icon
+      case ClothingCategory.midLayer:
         return Icons.layers;
       case ClothingCategory.bottom:
         return Icons.accessibility_new;
@@ -24,19 +23,14 @@ extension _CategoryIcon on ClothingCategory {
   }
 }
 
-// A card showing one clothing item: colour swatch with a category icon,
-// the name, and the key details. There are no photos, so the swatch
-// does the job of showing what the item looks like.
+// clothing item card
 class ClothingItemCard extends StatelessWidget {
   const ClothingItemCard({super.key, required this.item, this.onDelete});
 
   final ClothingItem item;
 
-  // Optional: if given, a delete icon appears. The page decides what
-  // happens (e.g. show a confirmation), the card only reports the tap.
   final VoidCallback? onDelete;
 
-  // "navy" -> "Navy"
   String _capitalise(String text) =>
       text.isEmpty ? text : text[0].toUpperCase() + text.substring(1);
 
@@ -44,13 +38,11 @@ class ClothingItemCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final swatch = ClothingColours.colorFor(item.colour);
 
-    // Dark icon on a light swatch, light icon on a dark swatch
     final iconColor =
         ThemeData.estimateBrightnessForColor(swatch) == Brightness.light
             ? Colors.black87
             : Colors.white;
 
-    // Skip the colour part of the subtitle if no colour was saved
     final subtitle = item.colour.isEmpty
         ? item.category.label
         : '${item.category.label} · ${_capitalise(item.colour)}';
@@ -58,13 +50,11 @@ class ClothingItemCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        // white at about 15% opacity, so the gradient shows through
         color: const Color(0x26FFFFFF),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
         children: [
-          // Colour swatch with the category icon on top
           CircleAvatar(
             radius: 26,
             backgroundColor: swatch,
@@ -94,8 +84,6 @@ class ClothingItemCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
 
-                // Warmth and waterproof badges (Wrap moves to a new line
-                // instead of overflowing on narrow screens)
                 Wrap(
                   spacing: 12,
                   runSpacing: 4,
@@ -134,7 +122,7 @@ class ClothingItemCard extends StatelessWidget {
             ),
           ),
 
-          // Delete icon, only shown if the page passed an onDelete
+          // Delete icon
           if (onDelete != null)
             IconButton(
               icon: const Icon(Icons.delete_outline, color: Colors.white70),

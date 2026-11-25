@@ -4,24 +4,19 @@ import 'package:fitcheck/models/clothing_item.dart';
 import 'package:fitcheck/models/outfit.dart';
 import 'package:fitcheck/models/weather_info.dart';
 
-/// Shared instance: `outfitService.generate(...)`.
 final outfitService = OutfitService();
 
-/// Builds an outfit from the user's wardrobe and the current weather.
-///
-/// Rule-based and pure (no Firebase, network or UI), so it is easy to test.
+// Builds an outfit from the user's wardrobe and the current weather.
 class OutfitService {
-  /// Wind speed (km/h) at or above which it counts as windy.
+  /// Wind speed
   static const double windyThreshold = 30;
 
-  // NEW: colours that go with everything.
+  // colours that go with everything.
   static const Set<String> _neutralColours = {
     'black', 'white', 'grey', 'navy', 'beige', 'brown',
   };
 
-  // NEW: pairs of non-neutral colours that work together. Any other pair of
-  // different non-neutral colours counts as a clash. This is taste, not
-  // science, so edit it freely.
+  // colours that pair well
   static const List<(String, String)> _goodPairs = [
     ('blue', 'orange'),
     ('blue', 'yellow'),
@@ -32,7 +27,7 @@ class OutfitService {
     ('purple', 'yellow'),
   ];
 
-  /// Maps how cold it feels (°C) to a warmth level, 1 (hot) to 5 (freezing).
+  // maps temps to warmth level
   int targetWarmthFor(double feelsLike) {
     if (feelsLike >= 22) return 1;
     if (feelsLike >= 16) return 2;
@@ -41,23 +36,20 @@ class OutfitService {
     return 5;
   }
 
-  /// Returns an outfit plus plain-English notes explaining each choice.
+  // Returns an outfit 
   Outfit generate({
     required List<ClothingItem> wardrobe,
     required WeatherInfo weather,
-    Random? random, // pass a seeded Random in tests for repeatable results
+    Random? random, // random for repeatable results
   }) {
     final rng = random ?? Random();
     final notes = <String>[];
     final rain = weather.rainLikely;
 
-    // NEW: everything chosen so far. Each new pick is colour-checked against
-    // this list, which is why the order of the picks below matters.
+    // colour checks against previous item
     final picked = <ClothingItem>[];
 
-    // NEW: picks one item and records it in `picked`.
-    // HOW: a function declared inside another function can use the outer
-    // function's variables (wardrobe, picked, rng), so each call below stays short.
+    // chooses an item and stores it in picked
     ClothingItem? choose(
       ClothingCategory category,
       int target, {
@@ -68,16 +60,14 @@ class OutfitService {
       return item;
     }
 
-    // 1. Target warmth for the whole outfit.
+    // warmth
     final target = targetWarmthFor(weather.feelsLike);
     notes.add(
       'It feels like ${weather.feelsLike.round()}°C, so the outfit should be '
       'around warmth level $target out of ${ClothingItem.maxWarmth}.',
     );
 
-    // 2. Outer layer: needed if it is cool, rainy or windy. Picked first
-    // because it matters most (warmth, waterproofing) and so gets first
-    // choice of colour.
+    // outerlayer
     final windy = weather.windSpeed >= windyThreshold;
     final reasons = <String>[
       if (target >= 3) 'it is cool',
@@ -96,10 +86,7 @@ class OutfitService {
       }
     }
 
-    // 3. NEW: mid layer (hoodie, jumper). Added when it is cold, or when it is
-    // cool and there is no outer layer to wear.
-    // HOW: with a coat on, the mid layer only needs to be one level below the
-    // target. Without a coat it has to do the coat's job as well.
+    // midlayer
     final needsMidLayer = target >= 4 || (target >= 3 && outerwear == null);
     final midLayer = needsMidLayer
         ? choose(ClothingCategory.midLayer, outerwear != null ? target - 1 : target)
@@ -113,11 +100,7 @@ class OutfitService {
       }
     }
 
-    // 4. Top and bottom.
-    // CHANGED: each layer worn over the top shares the warming, so the top can
-    // be lighter. HOW: target 5 with a coat and a hoodie gives the top a
-    // target of 3. Bottoms are only lightened for a coat, since a hoodie
-    // does not keep legs warm.
+    // top and bottom
     final layersOverTop =
         (outerwear != null ? 1 : 0) + (midLayer != null ? 1 : 0);
     final topTarget = max(ClothingItem.minWarmth, target - layersOverTop);
@@ -132,7 +115,7 @@ class OutfitService {
     final bottom = choose(ClothingCategory.bottom, bottomTarget);
     final shoes = choose(ClothingCategory.shoes, target, waterproof: rain);
 
-    // 5. Accessory (scarf, hat) when it is cold.
+    // accessory
     final accessory =
         target >= 4 ? choose(ClothingCategory.accessory, target) : null;
     if (accessory != null) notes.add('It is cold, so an accessory was added.');
@@ -154,9 +137,7 @@ class OutfitService {
     if (bottom == null) notes.add('You have no bottoms yet. Add some to complete the outfit.');
     if (shoes == null) notes.add('You have no shoes yet. Add some to complete the outfit.');
 
-    // NEW: final colour check. The picking avoids clashes where it can, but
-    // warmth and waterproofing come first, so a clash can still slip through.
-    // HOW: compare every pair of picked items once (i with each later j).
+    //  avoids colour clash
     String? clash;
     for (var i = 0; i < picked.length; i++) {
       for (var j = i + 1; j < picked.length; j++) {
@@ -182,15 +163,7 @@ class OutfitService {
     );
   }
 
-  /// Best item in [category] for [targetWarmth], or null if there is none.
-  ///
-  /// Score for each item:
-  ///   warmth fit      0 if exact, minus 1 per level away from the target
-  ///   waterproof      +3 if [wantWaterproof] and the item is waterproof
-  ///   colour clash    NEW: -2 for each already [picked] item it clashes with
-  ///
-  /// Items within 1 point of the best are "good enough" and one is chosen at
-  /// random, which is what lets "Try another" give a different outfit.
+  // picks the best-scoring item in a category
   ClothingItem? _pick(
     List<ClothingItem> wardrobe,
     ClothingCategory category,
@@ -206,9 +179,6 @@ class OutfitService {
       var s = -(item.warmth - targetWarmth).abs().toDouble();
       if (wantWaterproof && item.waterproof) s += 3;
 
-      // NEW: HOW: -2 is bigger than the 1-point "good enough" window, so a
-      // clashing item only wins if every alternative is a much worse
-      // fit for the weather.
       for (final other in picked) {
         if (!_coloursMatch(item.colour, other.colour)) s -= 2;
       }
@@ -216,13 +186,12 @@ class OutfitService {
     }
 
     final best = candidates.map(score).reduce((a, b) => a > b ? a : b);
+    // picks randomly among items within 1 point of the best
     final goodEnough = candidates.where((i) => score(i) >= best - 1).toList();
     return goodEnough[rng.nextInt(goodEnough.length)];
   }
 
-  /// NEW: true if two colours go together.
-  /// Matches: same colour, either one neutral, or a pair in [_goodPairs].
-  /// An unknown (empty) colour never counts as a clash.
+  // true if two colours go together
   bool _coloursMatch(String a, String b) {
     final x = a.toLowerCase().trim();
     final y = b.toLowerCase().trim();
@@ -230,7 +199,6 @@ class OutfitService {
     if (x.isEmpty || y.isEmpty || x == y) return true;
     if (_neutralColours.contains(x) || _neutralColours.contains(y)) return true;
 
-    // p.$1 and p.$2 are the two parts of each pair, checked in either order
     return _goodPairs.any(
       (p) => (p.$1 == x && p.$2 == y) || (p.$1 == y && p.$2 == x),
     );

@@ -3,9 +3,7 @@ import 'package:fitcheck/core/app_colours.dart';
 import 'package:fitcheck/models/weather_info.dart';
 import 'package:fitcheck/services/weather_service.dart';
 
-// A self-contained card showing today's weather. Drop it anywhere with
-// const WeatherCard(). It loads its own data and shows a spinner, the
-// weather, or an error with a retry button.
+// todays weather display
 class WeatherCard extends StatefulWidget {
   const WeatherCard({super.key});
 
@@ -14,17 +12,16 @@ class WeatherCard extends StatefulWidget {
 }
 
 class _WeatherCardState extends State<WeatherCard> {
-  // Started once here, so rebuilding the card doesn't re-request the weather
   late Future<WeatherInfo> _future = weatherService.getCurrentWeather();
 
-  // The retry button: fetch fresh weather, ignoring the saved result
+  // The retry button
   void _retry() {
     setState(() {
       _future = weatherService.getCurrentWeather(forceRefresh: true);
     });
   }
 
-  // Picks an icon for the WMO weather code
+  // chooses icon
   IconData _iconFor(int code) => switch (code) {
         0 || 1 => Icons.wb_sunny,
         2 || 3 => Icons.cloud,
@@ -43,14 +40,12 @@ class _WeatherCardState extends State<WeatherCard> {
       margin: const EdgeInsets.symmetric(horizontal: 24),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        // white at about 15% opacity, same as the wardrobe cards
         color: const Color(0x26FFFFFF),
         borderRadius: BorderRadius.circular(16),
       ),
       child: FutureBuilder<WeatherInfo>(
         future: _future,
         builder: (context, snapshot) {
-          // 1. Failed (no internet, timeout...)
           if (snapshot.hasError) {
             print(snapshot.error);
             return Row(
@@ -71,7 +66,6 @@ class _WeatherCardState extends State<WeatherCard> {
             );
           }
 
-          // 2. Still loading
           if (!snapshot.hasData) {
             return const Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -93,7 +87,6 @@ class _WeatherCardState extends State<WeatherCard> {
             );
           }
 
-          // 3. Loaded
           final w = snapshot.data!;
           return Column(
             children: [
@@ -152,7 +145,7 @@ class _WeatherCardState extends State<WeatherCard> {
   }
 }
 
-// A small icon + text pair, e.g. "30% rain"
+// A small icon + text pair
 class _Stat extends StatelessWidget {
   const _Stat({required this.icon, required this.text});
 
